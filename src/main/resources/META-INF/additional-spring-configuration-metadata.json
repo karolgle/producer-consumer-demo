@@ -1,0 +1,38 @@
+{
+  "properties": [
+    {
+      "name": "generator.expr.max",
+      "type": "java.lang.Integer",
+      "description": "Max expression length that can be generated."
+    },
+    {
+      "name": "generator.expr.min",
+      "type": "java.lang.Integer",
+      "description": "Min expression length that can be generated."
+    },
+    {
+      "name": "queue.capacity",
+      "type": "java.lang.Integer",
+      "description": "Max queue capacity."
+    },
+    {
+      "name": "consumers.sleeptime",
+      "type": "java.lang.Integer",
+      "description": "Sleep between consuming task in milliseconds."
+    },
+    {
+      "name": "consumers.number",
+      "type": "java.lang.Integer",
+      "description": "Number of consumers."
+    },
+    {
+      "name": "producers.sleeptime",
+      "type": "java.lang.Integer",
+      "description": "Sleep between producing task in milliseconds."
+    },
+    {
+      "name": "producers.number",
+      "type": "java.lang.Integer",
+      "description": "Number of producers."
+    }
+  ] }
