@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
+//dlaczego context co brzmi jak coś co reprezentuje stan relację z kolejką?
 public class PCJobContext<T> {
     // shared BlockingQueue used by all Producers and Consumers
     @NonNull

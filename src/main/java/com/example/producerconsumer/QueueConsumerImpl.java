@@ -25,11 +25,16 @@ public class QueueConsumerImpl implements QueueConsumer<String> {
     }
     
     @Override
+    //kolejność metod powinna być odwrotna
     public void consume(String operateOn) {
+        //ten kawalek kodu powinien być wydzielony - SRP
+
         String message;
         if (operateOn.equals(MathGeneratorService.POISON_PILL)) {
             message = String.format("Poison pill swallowed by: %s", name);
             messagesOutputList.add(message);
+
+            //logger ?
             System.out.println(message);
             Thread.currentThread()
                     .interrupt();
@@ -42,10 +47,13 @@ public class QueueConsumerImpl implements QueueConsumer<String> {
         // and consumer.consume would still work correctly but producers could start little earlier and the prints to console could be inconsistent
         // ...and if there were no 'half of the queue is empty' condition at all then using Spliterator and Stream's would be much cleaner approach.
         synchronized (pcJobContext.getWaitForEmptyingHalfOfTheQueue()) {
+            //dlaczego czekamy aż połoa kolejki będzie pusta? Jaki to będzie miało wpływ gdy kolejka będzie miała np 10_000 elementów - czekamy aż 5_000 będzie skonsumowane?
 
             // operation that will be done
             message = String.format("Consumer %s: %s = %s", name, operateOn, consumerService.process(operateOn));
             messagesOutputList.add(message);
+            //logger
+
             System.out.println(message);
 
             // block Producers if queue is full
@@ -54,6 +62,8 @@ public class QueueConsumerImpl implements QueueConsumer<String> {
                 message = "Start blocking Producers";
                 messagesOutputList.add(message);
                 System.out.println(message);
+
+                //kod który wykonuje logikę z kodem który buduje wiadomości i loguje jest pomieszany co wpływa na nieczytelność
             }
             // decrement only if > 1
             int checkIfProducersCanStartAddingToQueue = pcJobContext.getCounter().updateAndGet(i -> i > 0 ? i - 1 : i);

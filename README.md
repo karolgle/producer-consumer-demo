@@ -31,3 +31,12 @@ For now only me :).
 ## License
 
 A short snippet describing the license (MIT, Apache, etc.)
+
+
+Questions:
+- jak gdzieś wspomniałem - niby jest spring boot i conifguracja, ale potem nie tworzonę są beany/componenty 
+- niby jest lombok ale nie użyty
+- nie wiem co nam tutaj dają interfejsy - rozumiem jak mamy wiele implementacji ale tutaj czasem mam wrażenie że to za dużo
+- podział na warstwy a nie na domeny - co powoduje że struktura nie jest oczywista
+- Generalnie - kod byłby czytelniejszy gdyby jawnie powydzielać co od czego zależy oraz zachować osobne odpowiedzialności. 
+Szczerze - analizuje się ciężko.
