@@ -40,3 +40,4 @@ Questions:
 - podział na warstwy a nie na domeny - co powoduje że struktura nie jest oczywista
 - Generalnie - kod byłby czytelniejszy gdyby jawnie powydzielać co od czego zależy oraz zachować osobne odpowiedzialności. 
 Szczerze - analizuje się ciężko.
+- build.log - sugeruje że chyba coś nie bardzo.
