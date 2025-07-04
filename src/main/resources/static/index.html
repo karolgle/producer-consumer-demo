@@ -4,42 +4,158 @@
     <meta charset="UTF-8">
     <title>Producer Consumer Demo</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 2em; }
-        progress { width: 100%; height: 30px; }
-        progress::-webkit-progress-value { background: hotpink; }
-        progress::-moz-progress-bar { background: hotpink; }
+        :root {
+            --bg-color: #fafafa;
+            --text-color: #212121;
+            --accent-color: #6200ee;
+            --increasing-color: #d32f2f;
+            --decreasing-color: #388e3c;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            margin: 2em;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        body.dark {
+            --bg-color: #303030;
+            --text-color: #e0e0e0;
+            --accent-color: #bb86fc;
+        }
+
+        form {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        input[type="number"] {
+            width: 4rem;
+            padding: 0.3rem;
+        }
+
+        button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        #progress {
+            width: 100%;
+            height: 30px;
+            appearance: none;
+        }
+
+        #progress::-webkit-progress-bar {
+            background: #e0e0e0;
+            border-radius: 4px;
+        }
+
+        #progress::-webkit-progress-value {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        #progress.increasing::-webkit-progress-value {
+            background: var(--increasing-color);
+        }
+
+        #progress.decreasing::-webkit-progress-value {
+            background: var(--decreasing-color);
+        }
+
+        #progress::-moz-progress-bar {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        .switch {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
     </style>
 </head>
 <body>
 <h1>Producer Consumer Demo</h1>
+<div class="switch">
+    <label>
+        <input type="checkbox" id="modeToggle">
+        <span>Night mode</span>
+    </label>
+</div>
 <form id="controlForm">
     <label>Producers: <input type="number" id="producers" min="1" value="2" required></label>
     <label>Consumers: <input type="number" id="consumers" min="1" value="4" required></label>
-    <button type="submit">Start</button>
+    <button type="submit" id="start">Start</button>
     <button type="button" id="stop">Stop</button>
 </form>
 <div id="state"></div>
 <progress id="progress" value="0" max="10"></progress>
+<div id="trend"></div>
 <script>
-async function poll(){
+let lastSize = 0;
+
+async function poll() {
     const res = await fetch('/status');
-    if(res.ok){
+    if (res.ok) {
         const data = await res.json();
-        document.getElementById('progress').max = data.capacity;
-        document.getElementById('progress').value = data.size;
+        const progress = document.getElementById('progress');
+        progress.max = data.capacity;
+        progress.value = data.size;
+
+        progress.classList.remove('increasing', 'decreasing');
+        let trendText = 'Stable';
+        if (data.size > lastSize) {
+            progress.classList.add('increasing');
+            trendText = 'Queue increasing';
+        } else if (data.size < lastSize) {
+            progress.classList.add('decreasing');
+            trendText = 'Queue decreasing';
+        }
+        lastSize = data.size;
+        document.getElementById('trend').innerText = trendText;
+
         document.getElementById('state').innerText = data.running ? 'Running' : 'Stopped';
+        document.getElementById('start').disabled = data.running;
+        document.getElementById('stop').disabled = !data.running;
     }
 }
+
 setInterval(poll, 1000);
 
 document.getElementById('controlForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const body = {producers: parseInt(producers.value), consumers: parseInt(consumers.value)};
-    await fetch('/start', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    const body = {
+        producers: parseInt(producers.value),
+        consumers: parseInt(consumers.value)
+    };
+    await fetch('/start', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+    });
+    poll();
 });
 
 document.getElementById('stop').addEventListener('click', async () => {
-    await fetch('/stop', {method:'POST'});
+    await fetch('/stop', {method: 'POST'});
+    poll();
+});
+
+document.getElementById('modeToggle').addEventListener('change', (e) => {
+    document.body.classList.toggle('dark', e.target.checked);
 });
 
 poll();
