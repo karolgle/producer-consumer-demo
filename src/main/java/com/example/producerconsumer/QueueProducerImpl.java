@@ -47,7 +47,9 @@ public class QueueProducerImpl implements QueueProducer<String> {
 
                 System.out.println("Producer " + name + ": " + (isAddedToQueue ? "adds " + stringExpression + " to queue" : "DIDN'T manage to add"));
 
-                pcJobContext.getCounter().incrementAndGet();
+                if (isAddedToQueue) {
+                    pcJobContext.getCounter().incrementAndGet();
+                }
             } else if (stringExpression.equals(MathGeneratorService.POISON_PILL)) {
                 isAddedToQueue = pcJobContext.getQueue().offer(stringExpression);
             }
