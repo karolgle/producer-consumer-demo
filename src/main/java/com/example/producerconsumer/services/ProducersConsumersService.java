@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class that creates List of Producers and List of Consumers that that are linked with each other by the same BlockingQueue.
@@ -94,6 +95,17 @@ public class ProducersConsumersService {
             consumersThreadPool.invokeAll(callable);
         } catch (InterruptedException e) {
             e.printStackTrace();
+            Thread.currentThread().interrupt();
+        } finally {
+            producersThreadPool.shutdown();
+            consumersThreadPool.shutdown();
+            try {
+                producersThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+                consumersThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }
