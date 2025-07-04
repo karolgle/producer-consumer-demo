@@ -4,6 +4,7 @@ import com.example.producerconsumer.interfaces.QueueConsumer;
 import com.example.producerconsumer.interfaces.QueueProducer;
 import com.example.producerconsumer.model.PCJobContext;
 import org.javatuples.Triplet;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.ObjectFactory;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -20,6 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ProducersConsumersServiceTests {
 
     private ProducersConsumersService producersConsumersService;
+    private ExecutorService producersThreadPool;
+    private ExecutorService consumersThreadPool;
 
     @Before
     public void setUp() {
@@ -33,13 +37,27 @@ public class ProducersConsumersServiceTests {
                 .build());
     }
 
+    @After
+    public void tearDown() throws InterruptedException {
+        if (producersThreadPool != null) {
+            producersThreadPool.shutdown();
+            producersThreadPool.awaitTermination(5, TimeUnit.SECONDS);
+            producersThreadPool = null;
+        }
+        if (consumersThreadPool != null) {
+            consumersThreadPool.shutdown();
+            consumersThreadPool.awaitTermination(5, TimeUnit.SECONDS);
+            consumersThreadPool = null;
+        }
+    }
+
     @Test
     public void shouldConsume40Elements() throws InterruptedException {
         //given
         final int numberOfProducers = 4;
         final int numberOfConsumers = 4;
-        final ExecutorService producersThreadPool = Executors.newFixedThreadPool(numberOfProducers);
-        final ExecutorService consumersThreadPool = Executors.newFixedThreadPool(numberOfConsumers);
+        producersThreadPool = Executors.newFixedThreadPool(numberOfProducers);
+        consumersThreadPool = Executors.newFixedThreadPool(numberOfConsumers);
 
         ObjectFactory<PCJobContext<String>> pcJobContextObjectProvider = () -> PCJobContext.<String>builder()
                 .queue(new ArrayBlockingQueue<>(10))
@@ -69,8 +87,8 @@ public class ProducersConsumersServiceTests {
         //given
         final int numberOfProducers = 1;
         final int numberOfConsumers = 1;
-        final ExecutorService producersThreadPool = Executors.newFixedThreadPool(numberOfProducers);
-        final ExecutorService consumersThreadPool = Executors.newFixedThreadPool(numberOfConsumers);
+        producersThreadPool = Executors.newFixedThreadPool(numberOfProducers);
+        consumersThreadPool = Executors.newFixedThreadPool(numberOfConsumers);
 
         Triplet<List<QueueProducer<String>>, List<QueueConsumer<String>>, List<String>> producersAndConsumers = producersConsumersService.prepareProducersAndConsumers(numberOfProducers, numberOfConsumers, new MathGeneratorService(5, 100, 10));
 
@@ -91,8 +109,8 @@ public class ProducersConsumersServiceTests {
         //given
         final int numberOfProducers = 2;
         final int numberOfConsumers = 5;
-        final ExecutorService producersThreadPool = Executors.newFixedThreadPool(numberOfProducers);
-        final ExecutorService consumersThreadPool = Executors.newFixedThreadPool(numberOfConsumers);
+        producersThreadPool = Executors.newFixedThreadPool(numberOfProducers);
+        consumersThreadPool = Executors.newFixedThreadPool(numberOfConsumers);
 
         ObjectFactory<PCJobContext<String>> pcJobContextObjectProvider = () -> PCJobContext.<String>builder()
                 .queue(new ArrayBlockingQueue<>(10))
@@ -120,8 +138,8 @@ public class ProducersConsumersServiceTests {
         //given
         final int numberOfProducers = 5;
         final int numberOfConsumers = 5;
-        final ExecutorService producersThreadPool = Executors.newFixedThreadPool(numberOfProducers);
-        final ExecutorService consumersThreadPool = Executors.newFixedThreadPool(numberOfConsumers);
+        producersThreadPool = Executors.newFixedThreadPool(numberOfProducers);
+        consumersThreadPool = Executors.newFixedThreadPool(numberOfConsumers);
 
         Triplet<List<QueueProducer<String>>, List<QueueConsumer<String>>, List<String>> producersAndConsumers = producersConsumersService.prepareProducersAndConsumers(numberOfProducers, numberOfConsumers, new MathGeneratorService(250, 500, 100));
         //when invoke producers
@@ -139,8 +157,8 @@ public class ProducersConsumersServiceTests {
         //given
         final int numberOfProducers = 7;
         final int numberOfConsumers = 8;
-        final ExecutorService producersThreadPool = Executors.newFixedThreadPool(numberOfProducers);
-        final ExecutorService consumersThreadPool = Executors.newFixedThreadPool(numberOfConsumers);
+        producersThreadPool = Executors.newFixedThreadPool(numberOfProducers);
+        consumersThreadPool = Executors.newFixedThreadPool(numberOfConsumers);
 
         ObjectFactory<PCJobContext<String>> pcJobContextObjectProvider = () -> PCJobContext.<String>builder()
                 .queue(new ArrayBlockingQueue<>(10))
