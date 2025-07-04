@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Producer Consumer Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        progress { width: 100%; height: 30px; }
+        progress::-webkit-progress-value { background: hotpink; }
+        progress::-moz-progress-bar { background: hotpink; }
+    </style>
+</head>
+<body>
+<h1>Producer Consumer Demo</h1>
+<form id="controlForm">
+    <label>Producers: <input type="number" id="producers" min="1" value="2" required></label>
+    <label>Consumers: <input type="number" id="consumers" min="1" value="4" required></label>
+    <button type="submit">Start</button>
+    <button type="button" id="stop">Stop</button>
+</form>
+<div id="state"></div>
+<progress id="progress" value="0" max="10"></progress>
+<script>
+async function poll(){
+    const res = await fetch('/status');
+    if(res.ok){
+        const data = await res.json();
+        document.getElementById('progress').max = data.capacity;
+        document.getElementById('progress').value = data.size;
+        document.getElementById('state').innerText = data.running ? 'Running' : 'Stopped';
+    }
+}
+setInterval(poll, 1000);
+
+document.getElementById('controlForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const body = {producers: parseInt(producers.value), consumers: parseInt(consumers.value)};
+    await fetch('/start', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+});
+
+document.getElementById('stop').addEventListener('click', async () => {
+    await fetch('/stop', {method:'POST'});
+});
+
+poll();
+</script>
+</body>
+</html>
