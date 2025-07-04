@@ -29,7 +29,7 @@ public class PCJobContext<T> {
     @Builder
     public PCJobContext(@NonNull BlockingQueue<T> queue, @NonNull AtomicInteger counter, @NonNull AtomicBoolean waitForEmptyingHalfOfTheQueue, @NonNull int queueCapacity, @NonNull int sleepTimeConsumer, @NonNull int sleepTimeProducer) {
         if (queueCapacity < 1) {
-            throw new IllegalArgumentException("Shared queue queueCapacity must be greater then 0.");
+            throw new IllegalArgumentException("Shared queue queueCapacity must be greater than 0.");
         }
 
         if (sleepTimeConsumer < 0 || sleepTimeProducer < 0) {

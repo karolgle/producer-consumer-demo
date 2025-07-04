@@ -70,13 +70,13 @@ public class ProducersConsumersService {
 
     private void validateParameters(int numberOfProducers, int numberOfConsumers) {
         if (numberOfConsumers < 1 || numberOfProducers < 1) {
-            throw new IllegalArgumentException("Number of producers and consumers must be greater then 0.");
+            throw new IllegalArgumentException("Number of producers and consumers must be greater than 0.");
         }
         // because we implemented POISON_PILL(stopping of all consumers when producers finish theirs work)
         // there is a case when if numberOfProducers > numberOfConsumers the consumers stop consuming the tasks,
         // see how pillsPerProducer and pillsToBeAddedToLastProducer are used
         if (numberOfConsumers < numberOfProducers) {
-            throw new IllegalArgumentException("Number of consumers must be greater or equal then producers.");
+            throw new IllegalArgumentException("Number of consumers must be greater or equal than producers.");
         }
     }
 
