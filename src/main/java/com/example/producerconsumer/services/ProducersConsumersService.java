@@ -31,6 +31,9 @@ public class ProducersConsumersService {
     private final PCJobContext<String> pcJobContext;
     private final QueueVisualizer queueVisualizer;
 
+    private ExecutorService producersThreadPool;
+    private ExecutorService consumersThreadPool;
+
     @Autowired
     public ProducersConsumersService(ConsumerService consumerService, ObjectFactory<PCJobContext<String>> pcJobContextObjectProvider, QueueVisualizer queueVisualizer) {
         this.consumerService = consumerService;
@@ -87,9 +90,9 @@ public class ProducersConsumersService {
         }
     }
 
-    public void run(List<QueueProducer<String>> producers, List<QueueConsumer<String>> consumers) {
-        final ExecutorService producersThreadPool = Executors.newFixedThreadPool(producers.size());
-        final ExecutorService consumersThreadPool = Executors.newFixedThreadPool(consumers.size());
+    public synchronized void run(List<QueueProducer<String>> producers, List<QueueConsumer<String>> consumers) {
+        producersThreadPool = Executors.newFixedThreadPool(producers.size());
+        consumersThreadPool = Executors.newFixedThreadPool(consumers.size());
 
         // run producers - submit() method DOES NOT wait for the completion of all task
         producers.forEach(producersThreadPool::submit);
@@ -114,5 +117,17 @@ public class ProducersConsumersService {
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    public synchronized void stop() {
+        if (producersThreadPool != null) {
+            producersThreadPool.shutdownNow();
+            producersThreadPool = null;
+        }
+        if (consumersThreadPool != null) {
+            consumersThreadPool.shutdownNow();
+            consumersThreadPool = null;
+        }
+        queueVisualizer.close();
     }
 }
