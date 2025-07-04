@@ -23,7 +23,9 @@ public class QueueProducerImpl implements QueueProducer<String> {
     @Override
     public Void call() {
         exprStream.forEach(s -> {
-            // do-while loop need to be used because queue.put do not stop the stream.forEachLoop so some of the int pairs could be lost
+            // Use a do-while loop because queue.offer is non-blocking; when the
+            // queue is full offer returns false. Repeating until it succeeds
+            // prevents losing elements while the forEach loop continues.
             do {
                 try {
                     // simulate a long running process
