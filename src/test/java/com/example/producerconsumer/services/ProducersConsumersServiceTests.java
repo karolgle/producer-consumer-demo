@@ -3,6 +3,7 @@ package com.example.producerconsumer.services;
 import com.example.producerconsumer.interfaces.QueueConsumer;
 import com.example.producerconsumer.interfaces.QueueProducer;
 import com.example.producerconsumer.model.PCJobContext;
+import com.example.producerconsumer.QueueVisualizer;
 import org.javatuples.Triplet;
 import org.junit.After;
 import org.junit.Before;
@@ -34,7 +35,7 @@ public class ProducersConsumersServiceTests {
                 .queueCapacity(10)
                 .sleepTimeProducer(0)
                 .sleepTimeConsumer(0)
-                .build());
+                .build(), new QueueVisualizer(10));
     }
 
     @After
@@ -67,7 +68,7 @@ public class ProducersConsumersServiceTests {
                 .sleepTimeProducer(10)
                 .sleepTimeConsumer(20)
                 .build();
-        ProducersConsumersService producersConsumersService = new ProducersConsumersService(new ConsumerService(), pcJobContextObjectProvider);
+        ProducersConsumersService producersConsumersService = new ProducersConsumersService(new ConsumerService(), pcJobContextObjectProvider, new QueueVisualizer(10));
 
         Triplet<List<QueueProducer<String>>, List<QueueConsumer<String>>, List<String>> producersAndConsumers = producersConsumersService.prepareProducersAndConsumers(numberOfProducers, numberOfConsumers, new MathGeneratorService(5, 100, 10));
 
@@ -120,7 +121,7 @@ public class ProducersConsumersServiceTests {
                 .sleepTimeProducer(10)
                 .sleepTimeConsumer(100)
                 .build();
-        ProducersConsumersService producersConsumersService = new ProducersConsumersService(new ConsumerService(), pcJobContextObjectProvider);
+        ProducersConsumersService producersConsumersService = new ProducersConsumersService(new ConsumerService(), pcJobContextObjectProvider, new QueueVisualizer(10));
 
         Triplet<List<QueueProducer<String>>, List<QueueConsumer<String>>, List<String>> producersAndConsumers = producersConsumersService.prepareProducersAndConsumers(numberOfProducers, numberOfConsumers, new MathGeneratorService(5, 100, 10));
         //when invoke producers
@@ -168,7 +169,7 @@ public class ProducersConsumersServiceTests {
                 .sleepTimeProducer(100)
                 .sleepTimeConsumer(10)
                 .build();
-        ProducersConsumersService producersConsumersService = new ProducersConsumersService(new ConsumerService(), pcJobContextObjectProvider);
+        ProducersConsumersService producersConsumersService = new ProducersConsumersService(new ConsumerService(), pcJobContextObjectProvider, new QueueVisualizer(10));
 
 
         Triplet<List<QueueProducer<String>>, List<QueueConsumer<String>>, List<String>> producersAndConsumers = producersConsumersService.prepareProducersAndConsumers(numberOfProducers, numberOfConsumers, new MathGeneratorService(1, 1, 1));

@@ -3,6 +3,7 @@ package com.example.producerconsumer;
 import com.example.producerconsumer.interfaces.QueueProducer;
 import com.example.producerconsumer.model.PCJobContext;
 import com.example.producerconsumer.services.MathGeneratorService;
+import com.example.producerconsumer.QueueVisualizer;
 
 import java.util.stream.Stream;
 
@@ -13,11 +14,13 @@ public class QueueProducerImpl implements QueueProducer<String> {
     final private PCJobContext<String> pcJobContext;
     final private Stream<String> exprStream;
     final private String name;
+    final private QueueVisualizer queueVisualizer;
 
-    public QueueProducerImpl(String name, PCJobContext<String> pcJobContext, Stream<String> exprStream) {
+    public QueueProducerImpl(String name, PCJobContext<String> pcJobContext, Stream<String> exprStream, QueueVisualizer queueVisualizer) {
         this.name = name;
         this.pcJobContext = pcJobContext;
         this.exprStream = exprStream;
+        this.queueVisualizer = queueVisualizer;
     }
 
     @Override
@@ -50,7 +53,8 @@ public class QueueProducerImpl implements QueueProducer<String> {
                 System.out.println("Producer " + name + ": " + (isAddedToQueue ? "adds " + stringExpression + " to queue" : "DIDN'T manage to add"));
 
                 if (isAddedToQueue) {
-                    pcJobContext.getCounter().incrementAndGet();
+                    int newSize = pcJobContext.getCounter().incrementAndGet();
+                    queueVisualizer.update(newSize);
                 }
             } else if (stringExpression.equals(MathGeneratorService.POISON_PILL)) {
                 isAddedToQueue = pcJobContext.getQueue().offer(stringExpression);

@@ -4,6 +4,7 @@ import com.example.producerconsumer.interfaces.QueueConsumer;
 import com.example.producerconsumer.interfaces.QueueElementProcessor;
 import com.example.producerconsumer.model.PCJobContext;
 import com.example.producerconsumer.services.MathGeneratorService;
+import com.example.producerconsumer.QueueVisualizer;
 
 import java.util.List;
 
@@ -16,12 +17,14 @@ public class QueueConsumerImpl implements QueueConsumer<String> {
     final private QueueElementProcessor<String> consumerService;
     final private PCJobContext<String> pcJobContext;
     final private String name;
+    final private QueueVisualizer queueVisualizer;
 
-    public QueueConsumerImpl(String name, List<String> messagesOutputList, QueueElementProcessor<String> consumerService, PCJobContext<String> pcJobContext) {
+    public QueueConsumerImpl(String name, List<String> messagesOutputList, QueueElementProcessor<String> consumerService, PCJobContext<String> pcJobContext, QueueVisualizer queueVisualizer) {
         this.name = name;
         this.messagesOutputList = messagesOutputList;
         this.consumerService = consumerService;
         this.pcJobContext = pcJobContext;
+        this.queueVisualizer = queueVisualizer;
     }
     
     @Override
@@ -57,6 +60,7 @@ public class QueueConsumerImpl implements QueueConsumer<String> {
             }
             // decrement only if > 1
             int checkIfProducersCanStartAddingToQueue = pcJobContext.getCounter().updateAndGet(i -> i > 0 ? i - 1 : i);
+            queueVisualizer.update(checkIfProducersCanStartAddingToQueue);
 
             // stop blocking Producers if queue is half empty
             if (pcJobContext.getWaitForEmptyingHalfOfTheQueue().get() && checkIfProducersCanStartAddingToQueue < (pcJobContext.getQueueCapacity() / 2)) {

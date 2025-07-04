@@ -11,11 +11,14 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.example.producerconsumer.QueueVisualizer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 public class QueueConsumerImplTest {
 
     final ConsumerService  consumerService = new ConsumerService();
+
+    QueueVisualizer queueVisualizer;
 
     PCJobContext<String> pcJobContext;
     @Before
@@ -28,6 +31,7 @@ public class QueueConsumerImplTest {
                 .sleepTimeConsumer(0)
                 .sleepTimeProducer(0)
                 .build();
+        queueVisualizer = new QueueVisualizer(1);
     }
 
     @Test
@@ -35,7 +39,7 @@ public class QueueConsumerImplTest {
         //given
         List<String> messagesOutputList = new ArrayList<>();
         //when
-        new QueueConsumerImpl("C1", messagesOutputList, consumerService, pcJobContext).consume(MathGeneratorService.POISON_PILL);
+        new QueueConsumerImpl("C1", messagesOutputList, consumerService, pcJobContext, queueVisualizer).consume(MathGeneratorService.POISON_PILL);
         //then
         assertThat(messagesOutputList).containsOnly("Poison pill swallowed by: C1");
     }
@@ -45,7 +49,7 @@ public class QueueConsumerImplTest {
         //given
         List<String> messagesOutputList = new ArrayList<>();
         //when
-        new QueueConsumerImpl("C1", messagesOutputList, consumerService, pcJobContext).consume("2+2");
+        new QueueConsumerImpl("C1", messagesOutputList, consumerService, pcJobContext, queueVisualizer).consume("2+2");
         //then
         assertThat(messagesOutputList).containsOnly("Consumer C1: 2+2 = 4");
     }
@@ -62,7 +66,7 @@ public class QueueConsumerImplTest {
                 .queueCapacity(2)
                 .sleepTimeConsumer(0)
                 .sleepTimeProducer(0)
-                .build()).consume("2+2");
+                .build(), new QueueVisualizer(2)).consume("2+2");
         //then
         assertThat(messagesOutputList).containsOnly("Consumer C1: 2+2 = 4","Start blocking Producers");
     }
@@ -79,7 +83,7 @@ public class QueueConsumerImplTest {
                 .queueCapacity(2)
                 .sleepTimeConsumer(0)
                 .sleepTimeProducer(0)
-                .build()).consume("2+2");
+                .build(), new QueueVisualizer(2)).consume("2+2");
         //then
         assertThat(messagesOutputList).containsOnly("Consumer C1: 2+2 = 4", "Stop blocking Producers");
     }
@@ -89,6 +93,6 @@ public class QueueConsumerImplTest {
         //given
         List<String> messagesOutputList = new ArrayList<>();
         //when
-        new QueueConsumerImpl("C1", messagesOutputList, consumerService, pcJobContext).consume("2/0");
+        new QueueConsumerImpl("C1", messagesOutputList, consumerService, pcJobContext, queueVisualizer).consume("2/0");
     }
 }

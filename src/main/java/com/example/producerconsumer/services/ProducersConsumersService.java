@@ -2,6 +2,7 @@ package com.example.producerconsumer.services;
 
 import com.example.producerconsumer.QueueConsumerImpl;
 import com.example.producerconsumer.QueueProducerImpl;
+import com.example.producerconsumer.QueueVisualizer;
 import com.example.producerconsumer.interfaces.QueueConsumer;
 import com.example.producerconsumer.interfaces.QueueProducer;
 import com.example.producerconsumer.interfaces.TaskDataGenerator;
@@ -28,11 +29,13 @@ public class ProducersConsumersService {
 
     private final ConsumerService consumerService;
     private final PCJobContext<String> pcJobContext;
+    private final QueueVisualizer queueVisualizer;
 
     @Autowired
-    public ProducersConsumersService(ConsumerService consumerService, ObjectFactory<PCJobContext<String>> pcJobContextObjectProvider) {
+    public ProducersConsumersService(ConsumerService consumerService, ObjectFactory<PCJobContext<String>> pcJobContextObjectProvider, QueueVisualizer queueVisualizer) {
         this.consumerService = consumerService;
         this.pcJobContext = pcJobContextObjectProvider.getObject();
+        this.queueVisualizer = queueVisualizer;
     }
 
     /**
@@ -58,12 +61,15 @@ public class ProducersConsumersService {
         List<QueueProducer<String>> taskProducerImpls = new ArrayList<>();
         for (int i = 0; i < numberOfProducers; i++) {
             boolean isLastProducer = i == numberOfProducers - 1;
-            taskProducerImpls.add(new QueueProducerImpl("P" + i, pcJobContext, mathGeneratorService.addPoisonPill(mathGeneratorService.generator(), isLastProducer ? pillsPerProducer + pillsToBeAddedToLastProducer : pillsPerProducer)));
+            taskProducerImpls.add(new QueueProducerImpl("P" + i, pcJobContext,
+                    mathGeneratorService.addPoisonPill(mathGeneratorService.generator(),
+                            isLastProducer ? pillsPerProducer + pillsToBeAddedToLastProducer : pillsPerProducer),
+                    queueVisualizer));
         }
 
         List<QueueConsumer<String>> taskConsumerImpls = new ArrayList<>();
         for (int i = 0; i < numberOfConsumers; i++) {
-            taskConsumerImpls.add(new QueueConsumerImpl("C" + i, messageList, this.consumerService, pcJobContext));
+            taskConsumerImpls.add(new QueueConsumerImpl("C" + i, messageList, this.consumerService, pcJobContext, queueVisualizer));
         }
 
         return new Triplet<>(taskProducerImpls, taskConsumerImpls, messageList);
@@ -102,6 +108,7 @@ public class ProducersConsumersService {
             try {
                 producersThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
                 consumersThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+                queueVisualizer.close();
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 Thread.currentThread().interrupt();

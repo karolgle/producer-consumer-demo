@@ -1,6 +1,7 @@
 package com.example.producerconsumer.config;
 
 import com.example.producerconsumer.model.PCJobContext;
+import com.example.producerconsumer.QueueVisualizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -44,5 +45,11 @@ public class PCJobContextConfig {
                 .sleepTimeProducer(sleepTimeProducers)
                 .sleepTimeConsumer(sleepTimeConsumers)
                 .build();
+    }
+
+    @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public QueueVisualizer getQueueVisualizer() {
+        return new QueueVisualizer(queueCapacity);
     }
 }
